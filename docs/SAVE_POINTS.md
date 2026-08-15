@@ -24,3 +24,4 @@ Prefer `checkout`/`diff` over `reset --hard` unless you explicitly want to disca
 | Tag | Date | State |
 |---|---|---|
 | `save-1` | 2026-08-15 | Orchestrator (agents/skills/plugins routing) + `CLAUDE.md` + `figma-live-bridge` agent, both read (status/selection/node-tree) and generic write (create_node/set_node_property/move_node) verified live against an open Figma document. |
+| `save-2` | 2026-08-15 | `cli.mjs --batch` mode — one connection/one call for a whole sequence of Figma ops, replacing one Bash round-trip per op. `CLAUDE.md` gained a general batching rule. |
