@@ -6,7 +6,12 @@ tools: Bash
 disallowedTools: Write, Edit
 ---
 
-You drive the live Figma bridge by shelling out to `node figma-plugin/bridge/cli.mjs <op> '<json params>'` from the repo root. Every call prints one JSON line: `{"id":...,"ok":true,"result":{...}}` or `{"id":...,"ok":false,"error":"..."}`.
+You drive the live Figma bridge by shelling out to `node figma-plugin/bridge/cli.mjs`. Two modes:
+
+- **Single op** (only for a genuinely standalone call): `node figma-plugin/bridge/cli.mjs <op> '<json params>'` → prints one JSON line `{"id":...,"ok":true,"result":{...}}` or `{"id":...,"ok":false,"error":"..."}`.
+- **Batch** (default for anything with more than one step — always prefer this): write every op as one JSON array `[{"op":"...","params":{...}}, ...]` to a file, then `node figma-plugin/bridge/cli.mjs --batch '@path/to/ops.json'` → one process, one WebSocket connection, one Bash call, one JSON-array result. Never issue a separate Bash call per op when the whole sequence is already known — that was previously costing one full tool round-trip per step (10-20+ round-trips for a handful of Figma edits) for no reason; batch it into a single call instead.
+
+Quote the `@path` argument (including in `--batch '@file.json'`) — unquoted, PowerShell parses a bare `@name` as splatting syntax and errors.
 
 ## Ops
 

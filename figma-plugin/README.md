@@ -56,4 +56,21 @@ Params with spaces (e.g. text `characters`) don't survive PowerShell's native-ar
 node figma-plugin/bridge/cli.mjs set_node_property '@params.json'
 ```
 
+## Batching multiple ops
+
+For any multi-step task, don't call `cli.mjs` once per op — each call is a fresh process and a fresh relay connection, and from an agent driving this over Bash, a fresh tool round-trip per op. Write the whole sequence as one array and run it in one call:
+
+```json
+// ops.json
+[
+  { "op": "create_node", "params": { "type": "RECTANGLE", "x": 100, "y": 100, "width": 80, "height": 80 } },
+  { "op": "create_node", "params": { "type": "TEXT", "x": 100, "y": 200 } },
+  { "op": "set_node_property", "params": { "nodeId": "<id from previous result>", "props": { "characters": "Hello" } } }
+]
+```
+```
+node figma-plugin/bridge/cli.mjs --batch '@ops.json'
+```
+Prints a single JSON array of `{ id, ok, result | error }`, one entry per op, in order. Ops run sequentially over one connection (each waits for its response before the next is sent), so a later op can't yet reference an id returned by an earlier one within the same batch file — run in two batches if a later step genuinely needs an id a prior step just created.
+
 Component instances, image fills, and other richer operations are intentionally out of scope for this primitive — see `agents/orchestrator.md`'s planned `design-system` skill/agent for where that higher-level knowledge will live instead.

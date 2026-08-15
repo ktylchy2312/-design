@@ -3,42 +3,76 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 
 const PORT = 8765;
-const [, , op, paramsArg] = process.argv;
 
-if (!op) {
-  console.error("usage: node cli.mjs <op> ['<json params>' | @path/to/params.json]");
-  process.exit(1);
-}
-
-// Shell quoting of JSON containing spaces is unreliable across shells (confirmed broken on
-// PowerShell 5.1, which strips/misparses embedded double quotes) — @file sidesteps it entirely.
-let params = {};
-if (paramsArg) {
-  const raw = paramsArg.startsWith("@") ? readFileSync(paramsArg.slice(1), "utf8") : paramsArg;
+function readJsonArg(arg, label) {
+  const raw = arg.startsWith("@") ? readFileSync(arg.slice(1), "utf8") : arg;
   try {
-    params = JSON.parse(raw);
+    return JSON.parse(raw);
   } catch (err) {
-    console.error(`invalid JSON params: ${err.message}`);
+    console.error(`invalid JSON ${label}: ${err.message}`);
     process.exit(1);
   }
 }
 
-const id = randomUUID();
-const socket = new WebSocket(`ws://localhost:${PORT}/?role=caller`);
+// One request, wait for its matching response, resolve/reject.
+function sendOne(socket, op, params) {
+  const id = randomUUID();
+  return new Promise((resolve, reject) => {
+    const onMessage = (raw) => {
+      const msg = JSON.parse(raw.toString());
+      if (msg.id !== id) return;
+      socket.off("message", onMessage);
+      resolve(msg);
+    };
+    socket.on("message", onMessage);
+    socket.send(JSON.stringify({ id, op, params }));
+  });
+}
 
-socket.on("open", () => {
-  socket.send(JSON.stringify({ id, op, params }));
-});
+async function main() {
+  const [, , first, second] = process.argv;
 
-socket.on("message", (raw) => {
-  const msg = JSON.parse(raw.toString());
-  if (msg.id !== id) return;
-  console.log(JSON.stringify(msg));
+  if (!first) {
+    console.error(
+      "usage:\n" +
+      "  node cli.mjs <op> ['<json params>' | '@path/to/params.json']\n" +
+      "  node cli.mjs --batch '@path/to/ops.json'   # ops.json: [{ \"op\": \"...\", \"params\": {...} }, ...]\n" +
+      "Prefer --batch for any multi-step task — one connection, one process, one tool call " +
+      "instead of one per op."
+    );
+    process.exit(1);
+  }
+
+  const isBatch = first === "--batch";
+  if (isBatch && !second) {
+    console.error("--batch requires a path: node cli.mjs --batch '@path/to/ops.json'");
+    process.exit(1);
+  }
+
+  const requests = isBatch
+    ? readJsonArg(second, "batch file")
+    : [{ op: first, params: second ? readJsonArg(second, "params") : {} }];
+
+  const socket = new WebSocket(`ws://localhost:${PORT}/?role=caller`);
+  await new Promise((resolve, reject) => {
+    socket.on("open", resolve);
+    socket.on("error", (err) => reject(new Error(`relay unreachable: ${err.message}`)));
+  });
+
+  const results = [];
+  let allOk = true;
+  for (const { op, params } of requests) {
+    const msg = await sendOne(socket, op, params || {});
+    results.push(msg);
+    if (!msg.ok) allOk = false;
+  }
+
   socket.close();
-  process.exit(msg.ok ? 0 : 1);
-});
+  console.log(isBatch ? JSON.stringify(results) : JSON.stringify(results[0]));
+  process.exit(allOk ? 0 : 1);
+}
 
-socket.on("error", (err) => {
-  console.error(`relay unreachable: ${err.message}`);
+main().catch((err) => {
+  console.error(err.message);
   process.exit(1);
 });

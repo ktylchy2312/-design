@@ -24,6 +24,7 @@
 
 ## Principles (adapted from Karpathy's guidelines)
 
+
 - **Simplicity first** — an agent file, a manifest field, a rule: add only what's actually needed right now. No speculative config, no unused frontmatter fields "just in case."
 - **Surgical changes** — when editing an existing agent or the manifest, touch only what the task requires. Don't reformat or "improve" unrelated sections.
 - **State assumptions, don't guess** — if an agent's scope, name, or model choice is ambiguous, ask rather than picking silently.
@@ -36,6 +37,7 @@ Applies whenever this environment produces code, a script, or a shell command �
 - Write as a full-stack senior engineer: correct and efficient, but never more complex than the problem requires. Simple beats clever.
 - Don't do it all in one shot. Break the task into small steps, and get each one right before starting the next — a large unverified change is expensive to debug and expensive to redo.
 - Token economy is the governing constraint, not a nice-to-have: prefer the smallest diff or command that does the job, don't dump output you don't need to inspect, don't restate code back to the user that they can already see in the diff.
+- When a whole sequence of shell/tool calls is already known upfront (not exploratory, each step doesn't depend on discovering something from the last), batch it into one script or one call instead of one round-trip per step. Each separate tool call costs a full turn of overhead on top of the work itself — ~20 individual calls for 6 logical Figma edits (see `figma-plugin/README.md`'s batch mode) is the concrete example of what this rule exists to prevent.
 - No speculative code — no unused helpers, no handling for inputs that can't occur here.
 
 ## Verification
