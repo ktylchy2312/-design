@@ -1,0 +1,7 @@
+{
+  "name": "claude-design",
+  "description": "Custom multi-agent environment for this workspace. Coordinated by an orchestrator that minimizes token spend and latency.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "keywords": ["orchestrator", "multi-agent", "environment"]
+}

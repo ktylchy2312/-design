@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body style="font: 12px sans-serif; margin: 8px;">
+  <div id="status">connecting…</div>
+  <script>
+    const statusEl = document.getElementById("status");
+    const socket = new WebSocket("ws://localhost:8765/?role=plugin");
+
+    socket.onopen = () => { statusEl.textContent = "connected to relay"; };
+    socket.onclose = () => { statusEl.textContent = "disconnected — restart relay and re-run plugin"; };
+    socket.onerror = () => { statusEl.textContent = "relay unreachable (is server.mjs running?)"; };
+
+    socket.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      parent.postMessage({ pluginMessage: msg }, "*");
+    };
+
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+      if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(msg));
+    };
+  </script>
+</body>
+</html>

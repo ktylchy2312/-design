@@ -1,0 +1,8 @@
+{
+  "name": "figma-bridge-relay",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ws": "^8"
+  }
+}

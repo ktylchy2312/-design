@@ -1,0 +1,12 @@
+{
+  "name": "Claude Design Bridge",
+  "id": "claude-design-figma-bridge-dev",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["ws://localhost:8765"],
+    "reasoning": "Connects to a local relay server so Claude Code can read the currently open document during development."
+  }
+}
