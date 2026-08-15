@@ -26,12 +26,14 @@ Keep these tables current: whenever an agent, skill, or plugin is added to this 
 | Agent | Use for |
 |---|---|
 | `figma-live-bridge` | Reading the live/currently-open Figma document (selection, active page, node tree) or making interactive edits to it (create/move/style nodes) via the local Plugin-API bridge — not for static reads of a Figma file by link, that's `figma-bridge` (a separate installed plugin) |
+| `design-system` | Building components with variants, foundations (paint/text/effect styles), or typography variables in the currently open Figma document — richer design-system work than a single node edit, that's `figma-live-bridge` |
 
 **Skills** (packaged procedures, this plugin or others)
 
 | Skill | Use for |
 |---|---|
-| _(none registered yet)_ | |
+| `figma-design-system` | Recipes and API gotchas for building Figma components/variants, foundations, and typography variables via `eval_script` — loaded by the `design-system` agent |
+| `ui-reference-analysis` | Analyzing UI screenshots dropped in `assets/screenshots/ui components/` into a structured build brief (layout/colors/typography/variants) — produces a brief only, does not build anything in Figma itself |
 
 Keep each row to one line — the routing description, nothing more. That line is all of a skill you should ever look at before deciding to invoke it (see Progressive disclosure below).
 

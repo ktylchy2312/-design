@@ -16,6 +16,7 @@
 - `assets/` — reference material vendored from elsewhere, not part of the plugin itself
 - `.mcp.json` — registers Figma's official remote MCP server (`figma-official`), narrowly for bootstrapping brand-new empty Figma files (`whoami` + `create_new_file`) — all other Figma read/write work goes through the local bridge, never this server
 - `.claude/settings.json` — technically enforces that scope: only `whoami`/`create_new_file` are allowed on `figma-official`, every other tool it exposes is explicitly denied
+- `assets/screenshots/ui components/` — where the user drops UI reference screenshots for the `ui-reference-analysis` skill; briefs it writes (`<name>.brief.md`) live alongside the source images, not in a separate tree
 
 ## Adding a new agent, skill, or plugin dependency
 
@@ -50,6 +51,21 @@ Applies whenever this environment produces code, a script, or a shell command �
 - Token economy is the governing constraint, not a nice-to-have: prefer the smallest diff or command that does the job, don't dump output you don't need to inspect, don't restate code back to the user that they can already see in the diff.
 - When a whole sequence of shell/tool calls is already known upfront (not exploratory, each step doesn't depend on discovering something from the last), batch it into one script or one call instead of one round-trip per step. Each separate tool call costs a full turn of overhead on top of the work itself — ~20 individual calls for 6 logical Figma edits (see `figma-plugin/README.md`'s batch mode) is the concrete example of what this rule exists to prevent.
 - No speculative code — no unused helpers, no handling for inputs that can't occur here.
+
+## Process economy (research and planning)
+
+- Check what's already available locally — an installed app's cached reference skill, existing docs in this repo, prior `BUILD_LOG.md` entries — before dispatching a research subagent for external tool/API behavior. Concrete case: ~52k tokens went into researching Figma's Plugin API for variables/components before discovering a locally-cached reference skill (`figma-use`) that had the same facts, more precisely, for free.
+- Match planning ceremony to the task. Full plan mode (research subagents, a written plan file, an approval round-trip that echoes the whole plan back into context) is for genuinely large or uncertain work — a new protocol, a new architecture, several valid approaches. For a small, bounded addition (a wrapper agent around one well-known CLI, a one-line config change), a short inline proposal plus a direct question is enough — the ceremony's own overhead can cost more than the work it's planning.
+- A recurring per-call cost is a signal to fix the environment once, not pay it forever: e.g. a freshly-`winget`-installed CLI not yet on the running session's `PATH` means every shell call needs a `$env:Path +=` prefix — restarting the session (not adding a workaround to each call) removes that cost permanently.
+
+## Self-improving agents and skills
+
+After a skill or agent actually runs and completes a task, check whether the run surfaced something its own file didn't already cover — an error that needed a workaround, a rule that would have prevented a wasted step, a pattern worth reusing. If so, fold that lesson back into the responsible agent's or skill's own file before treating the task as done — not just into `docs/BUILD_LOG.md`, which is history, not instructions. This is exactly how `cli.mjs`'s `@file` param, `figma-plugin/README.md`'s quoting note, and `figma-design-system`'s gotchas got written — the same discipline, now standing practice instead of incidental.
+
+- Only capture what was actually hit, never a hypothetical — "might need this later" is speculative, exactly what the simplicity rule above already excludes.
+- Write it into the specific file whose gap caused the friction — the agent's own `.md`, the skill's `SKILL.md`, or the right `references/*.md` — so the *next* run of that exact agent or skill benefits immediately, without anyone having to go find the lesson first.
+- State it as a fact or rule for next time ("X requires Y", "Z throws unless W"), not a retelling of what happened — the narrative belongs in `BUILD_LOG.md`, the file itself should read like it always knew this.
+- If the lesson applies beyond one agent or skill, put it in the more general place (this file, or `agents/orchestrator.md`) instead of copying it into each one that would need it.
 
 ## Visual and UI design principles
 
