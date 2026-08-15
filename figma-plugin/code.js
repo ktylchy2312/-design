@@ -88,6 +88,11 @@ function moveNode(nodeId, params) {
   return summarizeNode(node);
 }
 
+async function evalScript(script) {
+  const fn = new Function("figma", `return (async () => { ${script} })();`);
+  return await fn(figma);
+}
+
 async function handleOp(op, params) {
   switch (op) {
     case "get_status":
@@ -130,6 +135,9 @@ async function handleOp(op, params) {
 
     case "move_node":
       return moveNode(params.nodeId, params);
+
+    case "eval_script":
+      return evalScript(params.script);
 
     default:
       throw new Error(`unknown op: ${op}`);

@@ -39,7 +39,7 @@ Keep each row to one line — the routing description, nothing more. That line i
 
 | Plugin | Provides |
 |---|---|
-| _(none registered yet)_ | |
+| `figma-official` (MCP server, `.mcp.json`) | Creating a brand-new empty Figma file (`whoami` + `create_new_file`) when there's no file open yet to run the local bridge in. Every other tool that server exposes is technically denied in `.claude/settings.json` — this project's own Figma read/write work always goes through `figma-live-bridge`, never this server. |
 
 ## Skill principles
 
