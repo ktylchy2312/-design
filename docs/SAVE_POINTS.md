@@ -21,8 +21,6 @@ Prefer `checkout`/`diff` over `reset --hard` unless you explicitly want to disca
 
 ## Log
 
-No save points yet — orchestrator and CLAUDE.md are still being worked on. First save point will be recorded here once they're stable.
-
 | Tag | Date | State |
 |---|---|---|
-| _(none yet)_ | | |
+| `save-1` | 2026-08-15 | Orchestrator (agents/skills/plugins routing) + `CLAUDE.md` + `figma-live-bridge` agent, both read (status/selection/node-tree) and generic write (create_node/set_node_property/move_node) verified live against an open Figma document. |
