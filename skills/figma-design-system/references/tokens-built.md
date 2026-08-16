@@ -18,9 +18,28 @@ All `COLOR` type, `scopes: ["ALL_SCOPES"]`. Naming: `<Group>/<step>`.
 
 ## Spacing — collection `Spacing`, one mode
 
-Tailwind's numeric naming convention, `FLOAT`, `scopes: ["GAP", "WIDTH_HEIGHT"]`: `space-0` (0), `space-0-5` (2px), `space-1` (4), `space-1-5` (6), `space-2` (8), `space-3` (12), `space-4` (16), `space-5` (20), `space-6` (24), `space-8` (32), `space-10` (40), `space-12` (48), `space-16` (64), `space-20` (80), `space-24` (96), `space-32` (128), `space-40` (160), `space-48` (192), `space-64` (256).
+Renamed semantically (superseded the original Tailwind-numeric version) — `FLOAT`, `scopes: ["GAP", "WIDTH_HEIGHT"]`, each variable's `description` holds its pixel value. Trimmed to top out at 128px (no `160`/`192`/`256` steps) — nothing in this file needs spacing beyond that.
 
-**Variable names can't contain a literal `.`** — `createVariable` throws `invalid variable name`. Use `-` instead (`space-0-5`, not `space-0.5`) — this is why the naming departs slightly from Tailwind's own `0.5` class suffix.
+| Name | Value | Use for |
+|---|---|---|
+| `space-none` | 0 | Touching elements, no gap |
+| `space-hairline` | 2 | Border-scale separation |
+| `space-icon-gap` | 4 | Between an icon and its adjacent label |
+| `space-tag-gap` | 6 | Inside small tags/badges |
+| `space-compact` | 8 | Dense list rows, badge internal padding |
+| `space-tight` | 12 | Button/input internal padding, compact row gaps |
+| `space-default` | 16 | Base unit — default gap/padding for most components, use this when nothing more specific applies |
+| `space-comfortable` | 20 | Relaxed list item spacing |
+| `space-card-padding` | 24 | Internal padding for cards/panels |
+| `space-section-gap` | 32 | Gap between major sections, sidebar padding |
+| `space-panel-padding` | 40 | Large panel/container padding |
+| `space-modal-padding` | 48 | Modal/dialog padding |
+| `space-layout-gap` | 64 | Gap between top-level layout regions (sidebar vs. content) |
+| `space-hero-padding` | 80 | Hero/feature area padding |
+| `space-page-margin` | 96 | Outer page margin |
+| `space-page-padding-xl` | 128 | Largest page-level padding, top of the scale |
+
+**Variable names can't contain a literal `.`** — `createVariable` throws `invalid variable name`. Use `-` instead — this bit the original numeric naming (`space-0.5` failed, `space-0-5` worked) and doesn't come up with semantic names, but keep it in mind for any future numeric-suffixed token.
 
 ## Radius — collection `Radius`, one mode
 

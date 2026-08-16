@@ -15,7 +15,13 @@ FRAME "<Name> — page"   (vertical auto-layout, hug height, fixed width = conte
 
 ## Verified script pattern
 
+**Position it away from existing content first — every `figma.createFrame()` defaults to (0,0), and every page frame built this way defaults to the same spot, so a second one silently stacks on top of the first.** Compute an offset from what's already on the page before creating the new one:
+
 ```js
+const existing = figma.currentPage.children.filter(function(n) { return n.type === 'FRAME'; });
+let nextX = 0;
+for (const n of existing) nextX = Math.max(nextX, n.x + n.width + 80); // 80px gap
+
 const target = await figma.getNodeByIdAsync(targetId); // the component set, or a foundations content frame
 const contentWidth = target.width;
 
@@ -26,6 +32,8 @@ page.itemSpacing = 0;
 page.fills = [{ type: 'SOLID', color: { r: 0.96, g: 0.96, b: 0.97 } }];
 figma.currentPage.appendChild(page);
 page.resize(contentWidth + 64, 100); // resize BEFORE sizing modes - resize() resets them to FIXED
+page.x = nextX;
+page.y = 0;
 page.primaryAxisSizingMode = 'AUTO';   // hug height
 page.counterAxisSizingMode = 'FIXED';  // fixed width
 
